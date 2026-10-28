@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clinic FAQ assistant</title>
+<style>
+  :root {
+    --paper: #ffffff;
+    --wash: #f2f5f6;
+    --ink: #17222b;
+    --muted: #5a6b78;
+    --line: #d5dde2;
+    --accent: #0b6b6f;
+    --accent-ink: #ffffff;
+    --warn: #9a3412;
+    --ok: #2f855a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #11181d;
+      --wash: #182128;
+      --ink: #e6edf1;
+      --muted: #9aabb7;
+      --line: #2b3943;
+      --accent: #4fb3b8;
+      --accent-ink: #08272a;
+      --warn: #f0a070;
+      --ok: #6fcf97;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 700px; margin: 0 auto; padding: 56px 24px 40px; }
+  h1 {
+    font: 600 2rem/1.2 Georgia, "Iowan Old Style", Palatino, serif;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .lede { color: var(--muted); margin: 0 0 28px; max-width: 56ch; }
+  .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.875rem; margin-bottom: 20px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); }
+  .dot.warn { background: var(--warn); }
+
+  label { display: block; font-weight: 600; margin-bottom: 8px; }
+  textarea {
+    width: 100%;
+    min-height: 112px;
+    resize: vertical;
+    padding: 12px 14px;
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  textarea:focus-visible, button:focus-visible, .example:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; }
+  .count { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+  .count.over { color: var(--warn); }
+  button.primary {
+    font: inherit; font-weight: 600;
+    padding: 9px 22px;
+    border: 0; border-radius: 6px;
+    background: var(--accent); color: var(--accent-ink);
+    cursor: pointer;
+  }
+  button.primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .examples { margin: 22px 0 0; padding: 0; list-style: none; }
+  .examples p { margin: 0 0 6px; color: var(--muted); font-size: 0.875rem; }
+  .example {
+    display: block; width: 100%; text-align: left;
+    background: none; border: 0; border-top: 1px solid var(--line);
+    padding: 9px 2px; font: inherit; color: var(--ink); cursor: pointer;
+  }
+  .example:hover { color: var(--accent); }
+  li:last-child .example { border-bottom: 1px solid var(--line); }
+
+  #result { margin-top: 36px; }
+  .answer {
+    border-left: 3px solid var(--accent);
+    background: var(--wash);
+    padding: 16px 18px;
+    border-radius: 0 6px 6px 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .answer.error { border-left-color: var(--warn); }
+  .meta { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); font-size: 0.875rem; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--ink); background: var(--paper); }
+
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.8125rem; }
+  footer a { color: inherit; }
+  @media (max-width: 520px) { main { padding-top: 36px; } h1 { font-size: 1.6rem; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Clinic FAQ assistant</h1>
+  <p class="lede">Ask about appointments, medical records or medication safety. Answers come only from the clinic's FAQ documents, and each one lists the sources it used.</p>
+
+  <div class="status" aria-live="polite"><span class="dot" id="dot"></span><span id="statusText">Checking service…</span></div>
+
+  <label for="question">Your question</label>
+  <textarea id="question" maxlength="1000" placeholder="For example: What should I do if I miss a dose of my medicine?"></textarea>
+  <div class="row">
+    <span class="count" id="count">0 / 1000</span>
+    <button class="primary" id="ask" type="button">Ask question</button>
+  </div>
+
+  <ul class="examples" id="examples">
+    <p>Try one of these</p>
+    <li><button class="example" type="button">What should someone do about a missed medicine dose?</button></li>
+    <li><button class="example" type="button">How do I get a copy of my medical records?</button></li>
+    <li><button class="example" type="button">Can the assistant confirm live appointment slots?</button></li>
+  </ul>
+
+  <section id="result" aria-live="polite"></section>
+
+  <footer>
+    This assistant gives general educational information only. It cannot diagnose, prescribe or replace a clinician. For urgent or severe symptoms, seek immediate professional help.
+    <a href="/docs">API documentation</a>
+  </footer>
+</main>
+
+<script>
+  const q = document.getElementById("question");
+  const askBtn = document.getElementById("ask");
+  const count = document.getElementById("count");
+  const result = document.getElementById("result");
+  const dot = document.getElementById("dot");
+  const statusText = document.getElementById("statusText");
+
+  function updateCount() {
+    count.textContent = q.value.length + " / 1000";
+    count.classList.toggle("over", q.value.length >= 1000);
+  }
+  q.addEventListener("input", updateCount);
+  q.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") ask();
+  });
+  document.querySelectorAll(".example").forEach((b) =>
+    b.addEventListener("click", () => { q.value = b.textContent; updateCount(); q.focus(); })
+  );
+
+  async function checkHealth() {
+    try {
+      const r = await fetch("/health");
+      const d = await r.json();
+      if (d.knowledge_base_ready) {
+        dot.className = "dot ok";
+        statusText.textContent = "Service is running";
+      } else {
+        dot.className = "dot warn";
+        statusText.textContent = "Service is starting. The first answer may take a little longer.";
+        setTimeout(checkHealth, 4000);
+      }
+    } catch (e) {
+      dot.className = "dot warn";
+      statusText.textContent = "Cannot reach the service. Retrying…";
+      setTimeout(checkHealth, 5000);
+    }
+  }
+
+  function show(text, opts = {}) {
+    result.replaceChildren();
+    const box = document.createElement("div");
+    box.className = "answer" + (opts.error ? " error" : "");
+    box.textContent = text;
+    result.appendChild(box);
+    if (opts.sources || opts.ms != null) {
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      if (opts.sources && opts.sources.length) {
+        const label = document.createElement("span");
+        label.textContent = "Sources";
+        meta.appendChild(label);
+        opts.sources.forEach((s) => {
+          const chip = document.createElement("span");
+          chip.className = "chip";
+          chip.textContent = s;
+          meta.appendChild(chip);
+        });
+      }
+      if (opts.ms != null) {
+        const t = document.createElement("span");
+        t.textContent = "Answered in " + (opts.ms / 1000).toFixed(1) + " s";
+        meta.appendChild(t);
+      }
+      result.appendChild(meta);
+    }
+  }
+
+  async function ask() {
+    const question = q.value.trim();
+    if (!question) { show("Enter a question to get started.", { error: true }); return; }
+    askBtn.disabled = true;
+    askBtn.textContent = "Asking…";
+    try {
+      const r = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        show(d.answer, { sources: d.sources, ms: d.response_time_ms });
+      } else if (r.status === 422) {
+        show("Your question could not be sent. Use between 1 and 1000 characters.", { error: true });
+      } else {
+        show(d.detail || "Something went wrong. Please try again.", { error: true });
+      }
+    } catch (e) {
+      show("Could not reach the service. Check your connection and try again.", { error: true });
+    } finally {
+      askBtn.disabled = false;
+      askBtn.textContent = "Ask question";
+    }
+  }
+  askBtn.addEventListener("click", ask);
+  checkHealth();
+</script>
+</body>
+</html>

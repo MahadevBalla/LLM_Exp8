@@ -1,0 +1,25 @@
+Educational Health and Clinic FAQ (demo content)
+
+General wellness:
+Drink water regularly throughout the day and pay attention to thirst, activity level, and local weather.
+Individual hydration needs vary. People with medical conditions that affect fluid intake should follow advice
+from their healthcare professional.
+
+Clinic appointments:
+To ask about appointment availability, contact the clinic reception desk using the contact details provided
+by the clinic. Availability can change, so the assistant cannot confirm live appointment slots.
+
+Medical records:
+For a copy of medical records, contact the clinic's medical records desk or reception and ask about its
+identity-verification and request procedure. Requirements can differ by clinic.
+
+Medication safety:
+If a medicine dose is missed, do not double the next dose unless a qualified healthcare professional or
+the medicine's official patient leaflet specifically instructs you to do so. The correct advice depends on the
+medicine and timing. Check the patient leaflet or contact a pharmacist or clinician for medicine-specific advice.
+Do not start, stop, or change medication based only on this educational FAQ.
+
+Safety and limitations:
+This FAQ is for general educational information only. It cannot diagnose conditions, prescribe treatment,
+or replace professional medical advice. For urgent or severe symptoms, seek immediate professional help.
+If a question is not covered by this FAQ, contact the clinic or a qualified healthcare professional.

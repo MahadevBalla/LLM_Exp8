@@ -1,0 +1,2 @@
+# Only needed on your own machine to run test_api.py and draw the plots
+matplotlib>=3.8.0
